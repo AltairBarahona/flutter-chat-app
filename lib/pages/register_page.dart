@@ -1,9 +1,12 @@
-import 'package:chat_app/widgets/boton_azul.dart';
+import 'package:chat_app/helpers/mostrar_alerta.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:chat_app/services/auth_service.dart';
 
+import 'package:chat_app/widgets/custom_input.dart';
 import 'labels.dart';
 import 'package:chat_app/widgets/logo.dart';
-import 'package:chat_app/widgets/custom_input.dart';
+import 'package:chat_app/widgets/boton_azul.dart';
 
 class RegisterPage extends StatelessWidget {
   @override
@@ -50,6 +53,7 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
     return Container(
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -74,11 +78,26 @@ class __FormState extends State<_Form> {
             isPassword: true,
           ),
           BotonAzul(
-            text: "Ingresar",
-            onPressed: () {
-              print(emailController.text);
-              print(passwordController.text);
-            },
+            text: "Registrar",
+            onPressed: authService.autenticando
+                ? null
+                : () async {
+                    print(nameController.text);
+                    print(emailController.text);
+                    print(passwordController.text);
+                    final registroOk = await authService.register(
+                      nameController.text.trim(),
+                      emailController.text.trim(),
+                      passwordController.text.trim(),
+                    );
+
+                    if (registroOk == true) {
+                      //Conectar socket server
+                      Navigator.pushReplacementNamed(context, "usuarios");
+                    } else {
+                      mostrarAlerta(context, "Registro incorrecto", registroOk);
+                    }
+                  },
           ),
         ],
       ),
